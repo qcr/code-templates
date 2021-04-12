@@ -3,4 +3,30 @@
 # Where the real work is done. This script can be updated more frequently as
 # it's shielded behind ./qcr_templates.
 
-echo "Hello templates!!"
+set -euo pipefail
+IFS=$'\n\t'
+
+# Global settings
+TMP_LOCATION="/tmp/qcr_templates"
+HACK_LOCATION="/home/ben/repos/templates"
+
+
+# Get a local copy of the templates repo
+printf "Getting latest templates: ... "
+if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
+mkdir -p "$TMP_LOCATION"
+git clone --quiet --depth 1 -b develop https://github.com/qcr/templates \
+  "$TMP_LOCATION"
+printf "Done\n"
+
+# Each directory denotes a valid template, process the user's selection
+templates=($(find "$HACK_LOCATION" -mindepth 1 -maxdepth 1 -type d \
+  -not -name '.git' -exec basename {} \;))
+if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
+    grep -q -P "^$1$"; then
+  printf "ERROR: %s"  \
+    "Invalid template provided ('${1:-}'). Please select one of:"
+  printf "\n\t%s" "${templates[@]}"
+  printf "\n"
+  exit 1
+fi
