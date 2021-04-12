@@ -5,6 +5,7 @@
 # it, but will always have access to the latest templates.
 #
 # Author: Ben Talbot
-# Version: 0.1.0
+# Version: 0.1.1
 
-bash <(wget -q -O - https://github.com/qcr/templates/raw/develop/use_template)
+bash <(curl -s -L https://github.com/qcr/templates/raw/develop/use_template \
+  --compressed) "$@"
