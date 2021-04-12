@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#
+# A light wrapper for using the templates building script. This is deliberately
+# light, so that users should never have to update this script once they have
+# it, but will always have access to the latest templates.
+#
+# Author: Ben Talbot
+# Version: 0.1.0
+
+wget -0 https://github.com/qcr/templates/raw/develop/use_template

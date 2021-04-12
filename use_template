@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#
+# Where the real work is done. This script can be updated more frequently as
+# it's shielded behind ./qcr_templates.
+
+echo "Hello templates!!"
