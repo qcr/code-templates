@@ -1,0 +1,8 @@
+PACKAGE_NAME:
+  text: "Package name"
+AUTHOR_NAME:
+  text: "Author name"
+  default: $(git config user.name)
+AUTHOR_EMAIL:
+  text: "Author email"
+  default: $(git config user.email)
