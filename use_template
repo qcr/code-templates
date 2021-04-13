@@ -6,9 +6,36 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Global settings
+################################################################################
+############################### Global settings ################################
+################################################################################
+
+SETTINGS_FILENAME=".settings.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
 HACK_LOCATION="/home/ben/repos/templates"
+
+################################################################################
+############################### Helper functions ###############################
+################################################################################
+
+function prompt_value() {
+  # $1 text, $2 default value string (optional)
+  text="$(echo "${1:-}" | sed 's/^"//; s/"$//')"
+  default="${2:-}"
+  if [ -n "$default" ] && echo "$default" | grep -q '^"'; then
+    default="$(echo "$default" | sed 's/"//g')"
+  elif [ -n "$default" ]; then
+    default="$(eval echo "$default")"
+  fi
+  default_string="$([ -n "$default" ] && echo " ($default)" || echo "")"
+  read -p "$text$default_string: " value
+  [ -z "$value" ] && echo "$default" || echo "$value"
+}
+
+
+################################################################################
+################################# Main script ##################################
+################################################################################
 
 
 # Get a local copy of the templates repo
@@ -23,10 +50,44 @@ printf "Done\n"
 templates=($(find "$HACK_LOCATION" -mindepth 1 -maxdepth 1 -type d \
   -not -name '.git' -exec basename {} \;))
 if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
-    grep -q -P "^$1$"; then
+    grep -q "^$1$"; then
   printf "ERROR: %s"  \
     "Invalid template provided ('${1:-}'). Please select one of:"
   printf "\n\t%s" "${templates[@]}"
   printf "\n"
   exit 1
 fi
+
+# Prompt user for variable values (using hacky YAML parsing)
+template="$1"
+settings_file="$HACK_LOCATION/$template/$SETTINGS_FILENAME" 
+keyvalues=()
+if [ -f "$settings_file" ]; then
+  key=
+  text=
+  default=
+  prompts=()
+  while read l; do
+    if echo "$l" | grep -q '^[^ ]*:'; then
+      if [ -n "$key" ]; then prompts+=("$key" "$text" "$default"); fi
+      key="$(echo "$l" | sed 's/^\([^:]*\).*/\1/')"
+      text=
+      default=
+    elif echo "$l" | grep -q '^ *text: '; then
+      text="$(echo "$l" | sed 's/^ *text: *\(.*\)$/\1/')"
+    elif echo "$l" | grep -q '^ *default: '; then
+      default="$(echo "$l" | sed 's/^ *default: *\(.*\)$/\1/')"
+    fi
+  done < "$settings_file"
+  if [ -n "$key" ]; then prompts+=("$key" "$text" "$default"); fi
+
+  for i in $(seq 0 ${#prompts[@]}); do
+    if [ $((i%3)) -eq 2 ]; then
+      keyvalues+=("${prompts[$(($i-2))]}" \
+        "$(prompt_value "${prompts[$(($i-1))]}" "${prompts[$i]}")")
+    fi
+  done
+fi
+
+# Pull template in, with variable values applied
+# TODO
