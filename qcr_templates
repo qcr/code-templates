@@ -4,8 +4,12 @@
 # light, so that users should never have to update this script once they have
 # it, but will always have access to the latest templates.
 #
+# Please see https://github.com/qcr/code_templates for full details on how
+# things work, and instructions on how to add your own templates. The more
+# templates the merrier!
+#
 # Author: Ben Talbot
-# Version: 0.1.1
+# Version: 0.1.2
 
 bash <(curl -s -L https://github.com/qcr/templates/raw/develop/use_template \
   --compressed) "$@"
