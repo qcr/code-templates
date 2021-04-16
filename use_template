@@ -22,6 +22,21 @@ TYPES=("basic" "yesno")
 ############################### Helper functions ###############################
 ################################################################################
 
+function chunk_count() {
+  # $1 chunk size, $2... array values
+  sz="$1"; shift
+  echo "$(( ($#+$sz-1)/$sz ))"
+}
+
+function chunk() {
+  # $1 chunk size, $2 chunk number, $3... array values
+  sz="$1"; num="$2"; shift $((sz*(num-1) + 2))
+  for i in $(seq 1 $sz); do
+    echo "${1:-}"
+    shift
+  done
+}
+
 function heading() {
   # $1 heading text
   char="-"
@@ -95,7 +110,7 @@ if [ -f "$settings_file" ]; then
   key=
   text=
   default=
-  type=
+  type="${TYPES[0]}"
   prompts=()
   while read l; do
     if echo "$l" | grep -q '^[^ ]*:'; then
@@ -103,7 +118,7 @@ if [ -f "$settings_file" ]; then
       key="$(echo "$l" | sed 's/^\([^:]*\).*/\1/')"
       text=
       default=
-      type=
+      type="${TYPES[0]}"
     elif echo "$l" | grep -q '^ *text: '; then
       text="$(echo "$l" | sed 's/^ *text: *\(.*\)$/\1/')"
     elif echo "$l" | grep -q '^ *default: '; then
@@ -114,12 +129,9 @@ if [ -f "$settings_file" ]; then
   done < "$settings_file"
   if [ -n "$key" ]; then prompts+=("$key" "$text" "$default" "$type"); fi
 
-  for i in $(seq 0 ${#prompts[@]}); do
-    if [ $((i%4)) -eq 3 ]; then
-      keyvalues+=("${prompts[$(($i-3))]}" \
-        "$(prompt_value "${prompts[$(($i-2))]}" "${prompts[$((i-1))]}" \
-        ${prompts[$i]})")
-    fi
+  for i in $(seq 1 $(chunk_count 4 "${prompts[@]}")); do
+    c=($(chunk 4 $i "${prompts[@]}"))
+    keyvalues+=("${c[0]}" "$(prompt_value "${c[1]}" "${c[2]}" "${c[3]}")")
   done
 else
   echo -e "Skipping due to no custom settings found in:\n\t$settings_file"
@@ -130,7 +142,8 @@ heading "Creating project from template"
 rsync -av "$HACK_LOCATION/$template/" .
 rm -vf "$SETTINGS_FILENAME"
 
-# Apply variable values to the 
+# Modify local directory based on variable settings
+heading "Applying user settings to template"
 
-# Pull template in, with variable values applied
-# TODO
+printf "Removing unnecessary directories:\n"
+
