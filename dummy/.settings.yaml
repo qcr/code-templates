@@ -6,7 +6,7 @@ AUTHOR_NAME:
   default: $(git config user.name)
 AUTHOR_EMAIL:
   text: "Author email"
-  default: $(git config user.email)
+  default: $(git config user.email || echo "todo@qut.edu.au")
 CPP_NODE:
   text: "Custom c++ node name"
   default: ""

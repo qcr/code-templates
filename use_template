@@ -66,14 +66,17 @@ function prompt_value() {
   while [ -z "$valid" ]; do
     read -p "$text ($default_string): " value
     if [ "$type" == "${TYPES[1]}" ]; then
-      if [ -z "$value" ] || echo "${value,,}" | grep -qE '^(y|yes|n|no)'; then
+      if [ -z "$value" ] || echo "${value,,}" | grep -qE '^(y|yes|n|no)$'; then
         valid=1
+        _v="$([ -z "$value" ] && echo "${default,,}" || echo "${value,,}")"
+        value="$(echo "$_v" | grep -qE '^(y|yes)' && echo "1")"
       fi
     else
       valid=1
     fi
   done
-  [ -z "$value" ] && echo "$default" || echo "$value"
+  [ -z "$value" ] && [ "$type" != "${TYPES[1]}" ] && \
+    echo "$default" || echo "$value"
 }
 
 
@@ -144,6 +147,12 @@ rm -vf "$SETTINGS_FILENAME"
 
 # Modify local directory based on variable settings
 heading "Applying user settings to template"
-
+echo "${keyvalues[@]}"
+exit
 printf "Removing unnecessary directories:\n"
-
+for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+  kv=($(chunk 2 $i "${keyvalues}"))
+  if [ -z "${kv[1]}" ]; then
+    :
+  fi
+done
