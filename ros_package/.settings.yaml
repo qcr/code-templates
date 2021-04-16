@@ -1,0 +1,30 @@
+PACKAGE_NAME:
+  text: "Package name"
+  default: "my_package"
+PACKAGE_VERSION:
+  text: "Package version"
+  default: "0.1.0"
+AUTHOR_NAME:
+  text: "Author's name"
+  default: $(git config user.name || echo "QCR")
+AUTHOR_EMAIL:
+  text: "Author's email"
+  default: $(git config user.email || echo "qcrbot@qut.edu.au")
+LICENSE:
+  text: "License type"
+  default: "BSD"
+ADD_CPP_NODE:
+  text: "Add a custom C++ ROS node with name:"
+  default: ""
+ADD_PYTHON_NODE:
+  text: "Add a custom Python ROS node with name:"
+  default: ""
+ADD_MSGS:
+  text: "Add custom ROS message definition with name:"
+  default: ""
+ADD_SERVICES:
+  text: "Add custom ROS service definition with name:"
+  default: ""
+ADD_ACTIONS:
+  text: "Add custom ROS action definition with name:"
+  default: ""

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>PACKAGE_NAME</name>
+  <version>PACKAGE_VERSION</version>
+  <description>The PACKAGE_NAME package</description>
+
+  <maintainer email="AUTHOR_EMAIL">AUTHOR_NAME</maintainer>
+
+  <license>LICENSE</license>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
