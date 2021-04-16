@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+
+import rospy
+
+from ADD_PYTHON_NODE import ADD_PYTHON_NODE.camel
+
+if __name__ == '__name__':
+    rospy.init_node('ADD_PYTHON_NODE')
+
+    n = ADD_PYTHON_NODE.camel()
+
+    rospy.spin()

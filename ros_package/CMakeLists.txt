@@ -10,7 +10,7 @@ find_package(catkin REQUIRED
   COMPONENTS message_generation
   )
 
-TEMPLATE_START ADD_PYTHON_NODE
+TEMPLATE_START ADD_PY_NODE
 catkin_python_setup()
 TEMPLATE_END
 
@@ -75,7 +75,7 @@ target_link_libraries(${PROJECT_NAME}_node
   )
 TEMPLATE_END
 
-TEMPLATE_START ADD_PYTHON_NODE
+TEMPLATE_START ADD_PY_NODE
 catkin_install_python(PROGRAMS
   scripts/my_python_script
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

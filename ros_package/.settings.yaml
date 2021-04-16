@@ -16,7 +16,7 @@ LICENSE:
 ADD_CPP_NODE:
   text: "Add a custom C++ ROS node with name:"
   default: ""
-ADD_PYTHON_NODE:
+ADD_PY_NODE:
   text: "Add a custom Python ROS node with name:"
   default: ""
 ADD_MSGS:
