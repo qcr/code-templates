@@ -125,6 +125,11 @@ else
   echo -e "Skipping due to no custom settings found in:\n\t$settings_file"
 fi
 
+# Create from template in local directory
+heading "Creating project from template"
+rsync -av "$HACK_LOCATION/$template/" .
+rm -vf "$SETTINGS_FILENAME"
+
 # Apply variable values to the 
 
 # Pull template in, with variable values applied
