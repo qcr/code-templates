@@ -15,6 +15,7 @@ IFS=$'\n\t'
 FILE_REQS_FILENAME=".file_reqs.yaml"
 SETTINGS_FILENAME=".settings.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
+TMP_FILE="/tmp/qcr_templates.tmp"
 HACK_LOCATION="/home/ben/repos/code_templates"
 
 TEMPLATE_START_MARKER="TEMPLATE_START"
@@ -152,16 +153,7 @@ rm -vf "$SETTINGS_FILENAME"
 # Modify local directory based on variable settings
 heading "Applying user settings to template"
 
-printf "Removing unnecessary directories and files:\n"
-for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
-  kv=($(chunk 2 $i "${keyvalues[@]}"))
-  if [ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]; then
-    find . -depth -name "*${kv[0]}*" -exec rm -rv {} \;
-  fi
-done
-printf "\tDone\n\n"
-
-printf "Remove unnecessary files based on file map:\n"
+printf "Remove unnecessary files based on file requirements map:\n"
 freqs_file="$HACK_LOCATION/$template/$FILE_REQS_FILENAME" 
 if [ -f "$freqs_file" ]; then
   while read l; do
@@ -171,7 +163,7 @@ if [ -f "$freqs_file" ]; then
     for r in "${reqs[@]}"; do
       for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
         kv=($(chunk 2 $i "${keyvalues[@]}"))
-        if [ "${#kv[@]}" -eq 1] || [ -z "${kv[1]}" ]; then
+        if [ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]; then
           remove=1
           break;
         fi
@@ -195,7 +187,7 @@ printf "\tDone\n\n"
 
 printf "Resolving in-file template chunks:\n"
 starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n'))
-for i in $(seq 1 $(chunk_count 3 "${starts[@]}")); do
+for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
   s=($(chunk 3 $i "${starts[@]}"))
   e=${s[1]}
   while read l; do
@@ -218,6 +210,7 @@ for i in $(seq 1 $(chunk_count 3 "${starts[@]}")); do
   done
 
   sed -i ${s[1]}$([ -z "$pass" ] && echo ',' || echo 'd;')$e'd' "${s[0]}"
+  cat -s "${s[0]}" > "$TMP_FILE"; mv "$TMP_FILE" "${s[0]}"
 done
 printf "\tDone\n\n"
 
@@ -228,3 +221,5 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   find . -type f -exec sed -i 's/'${kv[0]}'/'$v'/g' {} \;
 done
 printf "\tDone\n"
+
+exit 0
