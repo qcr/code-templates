@@ -1,0 +1,8 @@
+./action/: ADD_ACTIONS
+./include/: ADD_CPP_NODE
+./msg/: ADD_MSGS
+./scripts/: ADD_PY_NODE
+./src/: ADD_CPP_NODE ADD_PY_NODE
+./src/PACKAGE_NAME/__init__.py: ADD_PY_NODE
+./src/PACKAGE_NAME/ADD_PY_NODE.py: ADD_PY_NODE
+./src/PACKAGE_NAME/ADD_CPP_NODE.cpp: ADD_CPP_NODE
