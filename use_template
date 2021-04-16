@@ -147,12 +147,28 @@ rm -vf "$SETTINGS_FILENAME"
 
 # Modify local directory based on variable settings
 heading "Applying user settings to template"
-echo "${keyvalues[@]}"
-exit
-printf "Removing unnecessary directories:\n"
+
+printf "Removing unnecessary directories and files:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
-  kv=($(chunk 2 $i "${keyvalues}"))
-  if [ -z "${kv[1]}" ]; then
-    :
+  kv=($(chunk 2 $i "${keyvalues[@]}"))
+  if [ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]; then
+    find . -depth -name "*${kv[0]}*" -exec rm -rv {} \;
   fi
 done
+printf "\n"
+
+printf "Renaming directories and files:\n"
+for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+  kv=($(chunk 2 $i "${keyvalues[@]}"))
+  if [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
+    find . -depth -name "*${kv[0]}*" -exec \
+      bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
+  fi
+done
+printf "\n"
+
+printf "Removing unnecessary in-file template chunks:\n"
+printf "\tDone\n"
+
+printf "Replacing any remaining in-file template variables:\n"
+printf "\tDone\n"
