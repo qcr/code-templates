@@ -163,7 +163,8 @@ if [ -f "$freqs_file" ]; then
     for r in "${reqs[@]}"; do
       for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
         kv=($(chunk 2 $i "${keyvalues[@]}"))
-        if [ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]; then
+        if [ "${kv[0]}" == "$r" ] && \
+            ([ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]); then
           remove=1
           break;
         fi
