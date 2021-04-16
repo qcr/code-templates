@@ -161,16 +161,6 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
 done
 printf "\tDone\n\n"
 
-printf "Renaming directories and files:\n"
-for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
-  kv=($(chunk 2 $i "${keyvalues[@]}"))
-  if [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
-    find . -depth -name "*${kv[0]}*" -exec \
-      bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
-  fi
-done
-printf "\tDone\n\n"
-
 printf "Remove unnecessary files based on file map:\n"
 freqs_file="$HACK_LOCATION/$template/$FILE_REQS_FILENAME" 
 if [ -f "$freqs_file" ]; then
@@ -191,6 +181,16 @@ if [ -f "$freqs_file" ]; then
     if [ -n "$remove" ]; then rm -rfv "$target"; fi
   done < "$freqs_file"
 fi
+printf "\tDone\n\n"
+
+printf "Renaming directories and files:\n"
+for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+  kv=($(chunk 2 $i "${keyvalues[@]}"))
+  if [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
+    find . -depth -name "*${kv[0]}*" -exec \
+      bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
+  fi
+done
 printf "\tDone\n\n"
 
 printf "Resolving in-file template chunks:\n"
