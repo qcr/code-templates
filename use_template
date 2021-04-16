@@ -12,6 +12,7 @@ IFS=$'\n\t'
 ############################### Global settings ################################
 ################################################################################
 
+FILE_REQS_FILENAME=".file_reqs.yaml"
 SETTINGS_FILENAME=".settings.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
 HACK_LOCATION="/home/ben/repos/code_templates"
@@ -107,7 +108,7 @@ if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
   exit 1
 fi
 
-# Prompt user for variable values (using hacky YAML parsing)
+# Prompt user for variable values (using hacky "YAML" parsing)
 heading "Prompting user settings"
 template="$1"
 settings_file="$HACK_LOCATION/$template/$SETTINGS_FILENAME" 
@@ -168,6 +169,28 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
       bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
   fi
 done
+printf "\tDone\n\n"
+
+printf "Remove unnecessary files based on file map:\n"
+freqs_file="$HACK_LOCATION/$template/$FILE_REQS_FILENAME" 
+if [ -f "$freqs_file" ]; then
+  while read l; do
+    target="$(echo "$l" | sed 's/^\([^:]*\):.*/\1/')"
+    reqs=($(echo "$l" | sed 's/^[^:]*//' | tr ' ' '\n'))
+    remove=
+    for r in "${reqs[@]}"; do
+      for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+        kv=($(chunk 2 $i "${keyvalues[@]}"))
+        if [ "${#kv[@]}" -eq 1] || [ -z "${kv[1]}" ]; then
+          remove=1
+          break;
+        fi
+      done
+      if [ -n "$remove" ]; then break; fi
+    done
+    if [ -n "$remove" ]; then rm -rfv "$target"; fi
+  done < "$freqs_file"
+fi
 printf "\tDone\n\n"
 
 printf "Resolving in-file template chunks:\n"
