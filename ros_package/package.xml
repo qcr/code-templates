@@ -8,8 +8,10 @@
 
   <license>LICENSE</license>
 
+  TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
+  TEMPLATE_END
   <buildtool_depend>catkin</buildtool_depend>
 
 </package>

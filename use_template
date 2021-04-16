@@ -196,7 +196,7 @@ for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
     ((e++))
   done < <(sed -n ${s[1]}',$p' < "${s[0]}")
 
-  pass=1
+  pass=
   conditions=($(echo "${s[2]}" | awk '{for(i=2;i<=NF;i++){printf "%s\n", $i}}'))
   for c in "${conditions[@]}"; do
     v=
@@ -207,7 +207,7 @@ for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
         break
       fi
     done
-    if [ -z "$v" ]; then pass= ; break; fi
+    if [ -n "$v" ]; then pass=1 ; break; fi
   done
 
   sed -i ${s[1]}$([ -z "$pass" ] && echo ',' || echo 'd;')$e'd' "${s[0]}"
