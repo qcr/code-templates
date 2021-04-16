@@ -16,6 +16,8 @@ SETTINGS_FILENAME=".settings.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
 HACK_LOCATION="/home/ben/repos/code_templates"
 
+TEMPLATE_START_MARKER="TEMPLATE_START"
+TEMPLATE_END_MARKER="TEMPLATE_END"
 TYPES=("basic" "yesno")
 
 ################################################################################
@@ -155,7 +157,7 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
     find . -depth -name "*${kv[0]}*" -exec rm -rv {} \;
   fi
 done
-printf "\n"
+printf "\tDone\n\n"
 
 printf "Renaming directories and files:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
@@ -165,10 +167,40 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
       bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
   fi
 done
-printf "\n"
+printf "\tDone\n\n"
 
-printf "Removing unnecessary in-file template chunks:\n"
-printf "\tDone\n"
+printf "Resolving in-file template chunks:\n"
+starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n'))
+for i in $(seq 1 $(chunk_count 3 "${starts[@]}")); do
+  s=($(chunk 3 $i "${starts[@]}"))
+  e=${s[1]}
+  while read l; do
+    if echo "$l" | grep -qE "^ *$TEMPLATE_END_MARKER"; then break; fi
+    ((e++))
+  done < <(sed -n ${s[1]}',$p' < "${s[0]}")
+
+  pass=1
+  conditions=($(echo "${s[2]}" | awk '{for(i=2;i<=NF;i++){printf "%s\n", $i}}'))
+  for c in "${conditions[@]}"; do
+    v=
+    for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+      kv=($(chunk 2 $i "${keyvalues[@]}"))
+      if [ "${kv[0]}" == "$c" ]; then 
+        if [ "${#kv[@]}" -eq 2 ]; then v="${kv[1]}"; fi
+        break
+      fi
+    done
+    if [ -z "$v" ]; then pass= ; break; fi
+  done
+
+  sed -i ${s[1]}$([ -z "$pass" ] && echo ',' || echo 'd;')$e'd' "${s[0]}"
+done
+printf "\tDone\n\n"
 
 printf "Replacing any remaining in-file template variables:\n"
+for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+  kv=($(chunk 2 $i "${keyvalues[@]}"))
+  v="$([ "${#kv[@]}" -eq 2 ] && echo "${kv[1]}" || echo "")"
+  find . -type f -exec sed -i 's/'${kv[0]}'/'$v'/g' {} \;
+done
 printf "\tDone\n"
