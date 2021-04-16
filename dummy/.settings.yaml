@@ -10,7 +10,7 @@ AUTHOR_EMAIL:
 CPP_NODE:
   text: "Custom c++ node name"
   default: ""
-MSGS:
-  text: "Include ROS msgs in package"
+INCLUDE_MSGS:
+  text: "Include custom ROS msgs in package"
   default: "no"
   type: "yesno"

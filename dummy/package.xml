@@ -1,0 +1,8 @@
+<package format="2">
+  <name>PACKAGE_NAME</name>
+  <maintainer email="AUTHOR_EMAIL">AUTHOR_NAME</maintainer>
+
+  TEMPLATE_START CPP_NODE
+  <build_depend>roscpp</build_depend>
+  TEMPLATE_END
+</package>
