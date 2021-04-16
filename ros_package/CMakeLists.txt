@@ -7,7 +7,7 @@ TEMPLATE_END
 
 find_package(catkin REQUIRED
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
-  COMPONENTS message_generation
+  COMPONENTS message_generation std_msgs
   TEMPLATE_END
   )
 
@@ -18,22 +18,21 @@ TEMPLATE_END
 TEMPLATE_START ADD_MSGS
 add_message_files(
   FILES
-  Message1.msg
+  ADD_MSGS.msg
   )
 TEMPLATE_END
 
 TEMPLATE_START ADD_SERVICES
 add_service_files(
   FILES
-  Service1.srv
+  ADD_SERVICES.srv
   )
 TEMPLATE_END
 
-TEMPLATE_START ACC_ACTIONS
+TEMPLATE_START ADD_ACTIONS
 add_action_files(
   FILES
-  Action1.action
-  Action2.action
+  ADD_ACTIONS.action
   )
 TEMPLATE_END
 
