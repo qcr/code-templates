@@ -2,6 +2,8 @@
 #
 # Where the real work is done. This script can be updated more frequently as
 # it's shielded behind ./qcr_templates.
+#
+# This should maybe turn into Python if it grows any more?
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -19,6 +21,19 @@ TYPES=("basic" "yesno")
 ################################################################################
 ############################### Helper functions ###############################
 ################################################################################
+
+function heading() {
+  # $1 heading text
+  char="-"
+  text=" ${1:-} "
+  (( left_pad=(80 - ${#text})/2 ))
+  (( right_pad=(81 - ${#text})/2 ))
+  printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+  printf "%.0s$char" $(seq 1 $left_pad)
+  printf "$text"
+  printf "%.0s$char" $(seq 1 $right_pad)
+  printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+}
 
 function prompt_value() {
   # $1 text, $2 default value string (can be empty), $3 type (can be empty)
@@ -51,12 +66,11 @@ function prompt_value() {
 ################################# Main script ##################################
 ################################################################################
 
-
 # Get a local copy of the templates repo
-printf "Getting latest templates: ... "
+heading "Getting latest templates"
 if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
 mkdir -p "$TMP_LOCATION"
-git clone --quiet --depth 1 -b develop https://github.com/qcr/templates \
+git clone --depth 1 -b develop https://github.com/qcr/templates \
   "$TMP_LOCATION"
 printf "Done\n"
 
@@ -65,7 +79,7 @@ templates=($(find "$HACK_LOCATION" -mindepth 1 -maxdepth 1 -type d \
   -not -name '.git' -exec basename {} \;))
 if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
     grep -q "^$1$"; then
-  printf "ERROR: %s"  \
+  printf "\nERROR: %s"  \
     "Invalid template provided ('${1:-}'). Please select one of:"
   printf "\n\t%s" "${templates[@]}"
   printf "\n"
@@ -73,6 +87,7 @@ if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
 fi
 
 # Prompt user for variable values (using hacky YAML parsing)
+heading "Prompting user settings"
 template="$1"
 settings_file="$HACK_LOCATION/$template/$SETTINGS_FILENAME" 
 keyvalues=()
@@ -106,6 +121,8 @@ if [ -f "$settings_file" ]; then
         ${prompts[$i]})")
     fi
   done
+else
+  echo -e "Skipping due to no custom settings found in:\n\t$settings_file"
 fi
 
 # Apply variable values to the 
