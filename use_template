@@ -12,23 +12,37 @@ IFS=$'\n\t'
 
 SETTINGS_FILENAME=".settings.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
-HACK_LOCATION="/home/ben/repos/templates"
+HACK_LOCATION="/home/ben/repos/code_templates"
+
+TYPES=("basic" "yesno")
 
 ################################################################################
 ############################### Helper functions ###############################
 ################################################################################
 
 function prompt_value() {
-  # $1 text, $2 default value string (optional)
+  # $1 text, $2 default value string (can be empty), $3 type (can be empty)
   text="$(echo "${1:-}" | sed 's/^"//; s/"$//')"
   default="${2:-}"
+  type="$(echo "${3:-}" | sed 's/^"//; s/"$//')"
   if [ -n "$default" ] && echo "$default" | grep -q '^"'; then
     default="$(echo "$default" | sed 's/"//g')"
   elif [ -n "$default" ]; then
     default="$(eval echo "$default")"
   fi
-  default_string="$([ -n "$default" ] && echo " ($default)" || echo "")"
-  read -p "$text$default_string: " value
+  default_string="$([ -n "$default" ] && echo "$default" || \
+    echo "leave blank to skip")"
+  valid=
+  while [ -z "$valid" ]; do
+    read -p "$text ($default_string): " value
+    if [ "$type" == "${TYPES[1]}" ]; then
+      if [ -z "$value" ] || echo "${value,,}" | grep -qE '^(y|yes|n|no)'; then
+        valid=1
+      fi
+    else
+      valid=1
+    fi
+  done
   [ -z "$value" ] && echo "$default" || echo "$value"
 }
 
@@ -66,28 +80,35 @@ if [ -f "$settings_file" ]; then
   key=
   text=
   default=
+  type=
   prompts=()
   while read l; do
     if echo "$l" | grep -q '^[^ ]*:'; then
-      if [ -n "$key" ]; then prompts+=("$key" "$text" "$default"); fi
+      if [ -n "$key" ]; then prompts+=("$key" "$text" "$default" "$type"); fi
       key="$(echo "$l" | sed 's/^\([^:]*\).*/\1/')"
       text=
       default=
+      type=
     elif echo "$l" | grep -q '^ *text: '; then
       text="$(echo "$l" | sed 's/^ *text: *\(.*\)$/\1/')"
     elif echo "$l" | grep -q '^ *default: '; then
       default="$(echo "$l" | sed 's/^ *default: *\(.*\)$/\1/')"
+    elif echo "$l" | grep -q '^ *type: '; then
+      type="$(echo "$l" | sed 's/^ *type: *\(.*\)$/\1/')"
     fi
   done < "$settings_file"
-  if [ -n "$key" ]; then prompts+=("$key" "$text" "$default"); fi
+  if [ -n "$key" ]; then prompts+=("$key" "$text" "$default" "$type"); fi
 
   for i in $(seq 0 ${#prompts[@]}); do
-    if [ $((i%3)) -eq 2 ]; then
-      keyvalues+=("${prompts[$(($i-2))]}" \
-        "$(prompt_value "${prompts[$(($i-1))]}" "${prompts[$i]}")")
+    if [ $((i%4)) -eq 3 ]; then
+      keyvalues+=("${prompts[$(($i-3))]}" \
+        "$(prompt_value "${prompts[$(($i-2))]}" "${prompts[$((i-1))]}" \
+        ${prompts[$i]})")
     fi
   done
 fi
+
+# Apply variable values to the 
 
 # Pull template in, with variable values applied
 # TODO

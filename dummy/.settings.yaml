@@ -1,8 +1,16 @@
 PACKAGE_NAME:
   text: "Package name"
+  default: "my_package"
 AUTHOR_NAME:
   text: "Author name"
   default: $(git config user.name)
 AUTHOR_EMAIL:
   text: "Author email"
   default: $(git config user.email)
+CPP_NODE:
+  text: "Custom c++ node name"
+  default: ""
+MSGS:
+  text: "Include ROS msgs in package"
+  default: "no"
+  type: "yesno"
