@@ -156,7 +156,7 @@ fi
 # Create from template in local directory
 heading "Creating project from template"
 rsync -av "$SOURCE_LOCATION/$template/" .
-rm -vf "$SETTINGS_FILENAME"
+rm -vf "$SETTINGS_FILENAME" "$FILE_REQS_FILENAME"
 
 # Modify local directory based on variable settings
 heading "Applying user settings to template"
