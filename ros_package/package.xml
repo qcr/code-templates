@@ -12,6 +12,10 @@
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
   TEMPLATE_END
+  TEMPLATE_START ADD_ACTIONS
+  <build_depend>actionlib_msgs</build_depend>
+  <exec_depend>actionlib_msgs</exec_depend>
+  TEMPLATE_END
   <buildtool_depend>catkin</buildtool_depend>
 
 </package>

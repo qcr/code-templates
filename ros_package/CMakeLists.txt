@@ -6,6 +6,9 @@ add_compile_options(-std=c++11)
 TEMPLATE_END
 
 find_package(catkin REQUIRED
+  TEMPLATE_START ADD_ACTIONS
+  genmsg actionlib_msgs
+  TEMPLATE_END
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   COMPONENTS message_generation std_msgs
   TEMPLATE_END
@@ -40,6 +43,11 @@ TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
+TEMPLATE_END
+TEMPLATE_START ADD_ACTIONS
+  actionlib_msgs
+TEMPLATE_END
+TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   )
 TEMPLATE_END
 
