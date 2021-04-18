@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+#
+# Where the real work is done. This script can be updated more frequently as
+# it's shielded behind ./qcr_templates.
+#
+# This should maybe turn into Python if it grows any more?
+
+set -euo pipefail
+IFS=$'\n\t'
+
+################################################################################
+############################### Global settings ################################
+################################################################################
+
+FILE_REQS_FILENAME=".file_reqs.yaml"
+SETTINGS_FILENAME=".settings.yaml"
+TMP_LOCATION="/tmp/qcr_templates"
+TMP_FILE="/tmp/qcr_templates.tmp"
+
+TEMPLATE_START_MARKER="TEMPLATE_START"
+TEMPLATE_END_MARKER="TEMPLATE_END"
+TYPES=("basic" "yesno")
+
+################################################################################
+############################### Helper functions ###############################
+################################################################################
+
+function chunk_count() {
+  # $1 chunk size, $2... array values
+  sz="$1"; shift
+  echo "$(( ($#+$sz-1)/$sz ))"
+}
+
+function chunk() {
+  # $1 chunk size, $2 chunk number, $3... array values
+  sz="$1"; num="$2"; shift $((sz*(num-1) + 2))
+  for i in $(seq 1 $sz); do
+    echo "${1:-}"
+    shift
+  done
+}
+
+function heading() {
+  # $1 heading text
+  char="-"
+  text=" ${1:-} "
+  (( left_pad=(80 - ${#text})/2 ))
+  (( right_pad=(81 - ${#text})/2 ))
+  printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+  printf "%.0s$char" $(seq 1 $left_pad)
+  printf "$text"
+  printf "%.0s$char" $(seq 1 $right_pad)
+  printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+}
+
+function prompt_value() {
+  # $1 text, $2 default value string (can be empty), $3 type (can be empty)
+  text="$(echo "${1:-}" | sed 's/^"//; s/"$//')"
+  default="${2:-}"
+  type="$(echo "${3:-}" | sed 's/^"//; s/"$//')"
+  if [ -n "$default" ] && echo "$default" | grep -q '^"'; then
+    default="$(echo "$default" | sed 's/"//g')"
+  elif [ -n "$default" ]; then
+    default="$(eval echo "$default")"
+  fi
+  default_string="$([ -n "$default" ] && echo "$default" || \
+    echo "leave blank to skip")"
+  valid=
+  while [ -z "$valid" ]; do
+    read -t 0.1 -d '' -n 10000 discard || true
+    read -p "$text ($default_string): " value
+    if [ "$type" == "${TYPES[1]}" ]; then
+      if [ -z "$value" ] || echo "${value,,}" | grep -qE '^(y|yes|n|no)$'; then
+        valid=1
+        _v="$([ -z "$value" ] && echo "${default,,}" || echo "${value,,}")"
+        value="$(echo "$_v" | grep -qE '^(y|yes)' && echo "1")"
+      fi
+    else
+      valid=1
+    fi
+  done
+  [ -z "$value" ] && [ "$type" != "${TYPES[1]}" ] && \
+    echo "$default" || echo "$value"
+}
+
+
+################################################################################
+################################# Main script ##################################
+################################################################################
+
+# Get a local copy of the templates repo
+heading "Getting latest templates"
+if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
+mkdir -p "$TMP_LOCATION"
+git clone --depth 1 -b develop https://github.com/qcr/templates \
+  "$TMP_LOCATION"
+printf "Done\n"
+
+# Each directory denotes a valid template, process the user's selection
+templates=($(find "$TMP_LOCATION" -mindepth 1 -maxdepth 1 -type d \
+  -not -name '.git' -exec basename {} \;))
+if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
+    grep -q "^$1$"; then
+  printf "\nERROR: %s"  \
+    "Invalid template provided ('${1:-}'). Please select one of:"
+  printf "\n\t%s" "${templates[@]}"
+  printf "\n"
+  exit 1
+fi
+
+# Prompt user for variable values (using hacky "YAML" parsing)
+heading "Prompting user settings"
+template="$1"
+settings_file="$TMP_LOCATION/$template/$SETTINGS_FILENAME" 
+keyvalues=()
+if [ -f "$settings_file" ]; then
+  key=
+  text=
+  default=
+  type="${TYPES[0]}"
+  prompts=()
+  while read l; do
+    if echo "$l" | grep -q '^[^ ]*:'; then
+      if [ -n "$key" ]; then prompts+=("$key" "$text" "$default" "$type"); fi
+      key="$(echo "$l" | sed 's/^\([^:]*\).*/\1/')"
+      text=
+      default=
+      type="${TYPES[0]}"
+    elif echo "$l" | grep -q '^ *text: '; then
+      text="$(echo "$l" | sed 's/^ *text: *\(.*\)$/\1/')"
+    elif echo "$l" | grep -q '^ *default: '; then
+      default="$(echo "$l" | sed 's/^ *default: *\(.*\)$/\1/')"
+    elif echo "$l" | grep -q '^ *type: '; then
+      type="$(echo "$l" | sed 's/^ *type: *\(.*\)$/\1/')"
+    fi
+  done < "$settings_file"
+  if [ -n "$key" ]; then prompts+=("$key" "$text" "$default" "$type"); fi
+
+  for i in $(seq 1 $(chunk_count 4 "${prompts[@]}")); do
+    c=($(chunk 4 $i "${prompts[@]}"))
+    keyvalues+=("${c[0]}" "$(prompt_value "${c[1]}" "${c[2]}" "${c[3]}")")
+  done
+else
+  echo -e "Skipping due to no custom settings found in:\n\t$settings_file"
+fi
+
+# Create from template in local directory
+heading "Creating project from template"
+rsync -av "$TMP_LOCATION/$template/" .
+rm -vf "$SETTINGS_FILENAME"
+
+# Modify local directory based on variable settings
+heading "Applying user settings to template"
+
+printf "Remove unnecessary files based on file requirements map:\n"
+freqs_file="$TMP_LOCATION/$template/$FILE_REQS_FILENAME" 
+if [ -f "$freqs_file" ]; then
+  while read l; do
+    target="$(echo "$l" | sed 's/^\([^:]*\):.*/\1/')"
+    reqs=($(echo "$l" | sed 's/^[^:]*//' | tr ' ' '\n'))
+    remove=
+    for r in "${reqs[@]}"; do
+      for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+        kv=($(chunk 2 $i "${keyvalues[@]}"))
+        if [ "${kv[0]}" == "$r" ] && \
+            ([ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]); then
+          remove=1
+          break;
+        fi
+      done
+      if [ -n "$remove" ]; then break; fi
+    done
+    if [ -n "$remove" ]; then rm -rfv "$target"; fi
+  done < "$freqs_file"
+fi
+printf "\tDone\n\n"
+
+printf "Renaming directories and files:\n"
+for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+  kv=($(chunk 2 $i "${keyvalues[@]}"))
+  if [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
+    find . -depth -name "*${kv[0]}*" -exec \
+      bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
+  fi
+done
+printf "\tDone\n\n"
+
+printf "Resolving in-file template chunks:\n"
+starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n'))
+for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
+  s=($(chunk 3 $i "${starts[@]}"))
+  e=${s[1]}
+  while read l; do
+    if echo "$l" | grep -qE "^ *$TEMPLATE_END_MARKER"; then break; fi
+    ((e++))
+  done < <(sed -n ${s[1]}',$p' < "${s[0]}")
+
+  pass=
+  conditions=($(echo "${s[2]}" | awk '{for(i=2;i<=NF;i++){printf "%s\n", $i}}'))
+  for c in "${conditions[@]}"; do
+    v=
+    for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+      kv=($(chunk 2 $i "${keyvalues[@]}"))
+      if [ "${kv[0]}" == "$c" ]; then 
+        if [ "${#kv[@]}" -eq 2 ]; then v="${kv[1]}"; fi
+        break
+      fi
+    done
+    if [ -n "$v" ]; then pass=1 ; break; fi
+  done
+
+  sed -i ${s[1]}$([ -z "$pass" ] && echo ',' || echo 'd;')$e'd' "${s[0]}"
+  cat -s "${s[0]}" > "$TMP_FILE"; mv "$TMP_FILE" "${s[0]}"
+done
+printf "\tDone\n\n"
+
+printf "Replacing any remaining in-file template variables:\n"
+for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
+  kv=($(chunk 2 $i "${keyvalues[@]}"))
+  v="$([ "${#kv[@]}" -eq 2 ] && echo "${kv[1]}" || echo "")"
+  find . -type f -exec sed -i 's/'${kv[0]}'/'$v'/g' {} \;
+done
+printf "\tDone\n"
+
+exit 0

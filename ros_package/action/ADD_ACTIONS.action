@@ -1,0 +1,8 @@
+# Goal
+int8 goal_state
+---
+# Feedback
+int8 feedback
+---
+# Result
+int8 result
