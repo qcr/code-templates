@@ -85,7 +85,7 @@ TEMPLATE_END
 
 TEMPLATE_START ADD_PY_NODE
 catkin_install_python(PROGRAMS
-  scripts/my_python_script
+  scripts/ADD_PY_NODE
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 TEMPLATE_END
