@@ -43,11 +43,11 @@ TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
-TEMPLATE_END
-TEMPLATE_START ADD_ACTIONS
+  TEMPLATE_END
+  TEMPLATE_START ADD_ACTIONS
   actionlib_msgs
-TEMPLATE_END
-TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
+  TEMPLATE_END
+  TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   )
 TEMPLATE_END
 
@@ -64,13 +64,13 @@ include_directories(
   )
 
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}/ros_package.cpp
+  src/${PROJECT_NAME}/ADD_CPP_NODE.cpp
   )
 add_dependencies(${PROJECT_NAME}
   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}
   )
 
-add_executable(${PROJECT_NAME}_node src/ros_package_node.cpp)
+add_executable(${PROJECT_NAME}_node src/ADD_CPP_NODE.cpp)
 set_target_properties(${PROJECT_NAME}_node
   PROPERTIES OUTPUT_NAME node PREFIX ""
   )
