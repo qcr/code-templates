@@ -16,7 +16,6 @@ FILE_REQS_FILENAME=".file_reqs.yaml"
 SETTINGS_FILENAME=".settings.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
 TMP_FILE="/tmp/qcr_templates.tmp"
-HACK_LOCATION="/home/ben/repos/code_templates"
 
 TEMPLATE_START_MARKER="TEMPLATE_START"
 TEMPLATE_END_MARKER="TEMPLATE_END"
@@ -98,7 +97,7 @@ git clone --depth 1 -b develop https://github.com/qcr/templates \
 printf "Done\n"
 
 # Each directory denotes a valid template, process the user's selection
-templates=($(find "$HACK_LOCATION" -mindepth 1 -maxdepth 1 -type d \
+templates=($(find "$TMP_LOCATION" -mindepth 1 -maxdepth 1 -type d \
   -not -name '.git' -exec basename {} \;))
 if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
     grep -q "^$1$"; then
@@ -112,7 +111,7 @@ fi
 # Prompt user for variable values (using hacky "YAML" parsing)
 heading "Prompting user settings"
 template="$1"
-settings_file="$HACK_LOCATION/$template/$SETTINGS_FILENAME" 
+settings_file="$TMP_LOCATION/$template/$SETTINGS_FILENAME" 
 keyvalues=()
 if [ -f "$settings_file" ]; then
   key=
@@ -147,14 +146,14 @@ fi
 
 # Create from template in local directory
 heading "Creating project from template"
-rsync -av "$HACK_LOCATION/$template/" .
+rsync -av "$TMP_LOCATION/$template/" .
 rm -vf "$SETTINGS_FILENAME"
 
 # Modify local directory based on variable settings
 heading "Applying user settings to template"
 
 printf "Remove unnecessary files based on file requirements map:\n"
-freqs_file="$HACK_LOCATION/$template/$FILE_REQS_FILENAME" 
+freqs_file="$TMP_LOCATION/$template/$FILE_REQS_FILENAME" 
 if [ -f "$freqs_file" ]; then
   while read l; do
     target="$(echo "$l" | sed 's/^\([^:]*\):.*/\1/')"
