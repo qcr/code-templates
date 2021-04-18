@@ -88,6 +88,13 @@ function prompt_value() {
 ################################# Main script ##################################
 ################################################################################
 
+# Error if the directory isn't empty
+if [ -n "$(ls -A .)" ]; then
+  print "ERROR: %s%s\n%s" "This directory isn't empty. "\
+    "Please only run this script in an empty directory," "for a NEW project!"
+  exit 1
+fi
+
 # Get a local copy of the templates repo
 heading "Getting latest templates"
 if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
