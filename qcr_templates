@@ -9,7 +9,7 @@
 # templates the merrier!
 #
 # Author: Ben Talbot
-# Version: 0.1.2
+# Version: 0.2.0
 
-bash <(curl -s -L https://github.com/qcr/templates/raw/develop/use_template \
-  --compressed) "$@"
+bash <(curl -s -L --compressed \
+  https://github.com/qcr/code_templates/raw/master/use_template ) "$@"

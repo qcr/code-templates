@@ -12,14 +12,17 @@ IFS=$'\n\t'
 ############################### Global settings ################################
 ################################################################################
 
-FILE_REQS_FILENAME=".file_reqs.yaml"
-SETTINGS_FILENAME=".settings.yaml"
+FILE_REQS_FILENAME=".files.yaml"
+SETTINGS_FILENAME=".variables.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
 TMP_FILE="/tmp/qcr_templates.tmp"
 
 TEMPLATE_START_MARKER="TEMPLATE_START"
 TEMPLATE_END_MARKER="TEMPLATE_END"
 TYPES=("basic" "yesno")
+
+SOURCE_LOCATION="$([ -z "${LOCAL_LOCATION:-}" ] && echo "$TMP_LOCATION" \
+  || echo "$LOCAL_LOCATION")"
 
 ################################################################################
 ############################### Helper functions ###############################
@@ -83,10 +86,27 @@ function prompt_value() {
     echo "$default" || echo "$value"
 }
 
+function transform() {
+  # $1 value, $2 transformation type ("camel", "pascal")
+  if [ "${2,,}" == "camel" ]; then
+    echo "$1" | sed 's/_\(.\)/\U\1/g'
+  elif [ "${2,,}" == "pascal" ]; then
+    echo "$1" | sed 's/_\(.\)/\U\1/g; s/^./\U\0/'
+  else
+    echo "$1"
+  fi
+}
 
 ################################################################################
 ################################# Main script ##################################
 ################################################################################
+
+# Error if the directory isn't empty
+if [ -n "$(ls -A .)" ]; then
+  printf "ERROR: %s%s\n%s\n" "This directory isn't empty. "\
+    "Please only run this script in an empty directory," "for a NEW project!"
+  exit 1
+fi
 
 # Get a local copy of the templates repo
 heading "Getting latest templates"
@@ -97,7 +117,7 @@ git clone --depth 1 -b develop https://github.com/qcr/templates \
 printf "Done\n"
 
 # Each directory denotes a valid template, process the user's selection
-templates=($(find "$TMP_LOCATION" -mindepth 1 -maxdepth 1 -type d \
+templates=($(find "$SOURCE_LOCATION" -mindepth 1 -maxdepth 1 -type d \
   -not -name '.git' -exec basename {} \;))
 if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
     grep -q "^$1$"; then
@@ -111,7 +131,7 @@ fi
 # Prompt user for variable values (using hacky "YAML" parsing)
 heading "Prompting user settings"
 template="$1"
-settings_file="$TMP_LOCATION/$template/$SETTINGS_FILENAME" 
+settings_file="$SOURCE_LOCATION/$template/$SETTINGS_FILENAME" 
 keyvalues=()
 if [ -f "$settings_file" ]; then
   key=
@@ -146,29 +166,29 @@ fi
 
 # Create from template in local directory
 heading "Creating project from template"
-rsync -av "$TMP_LOCATION/$template/" .
-rm -vf "$SETTINGS_FILENAME"
+rsync -av "$SOURCE_LOCATION/$template/" .
+rm -vf "$SETTINGS_FILENAME" "$FILE_REQS_FILENAME"
 
 # Modify local directory based on variable settings
 heading "Applying user settings to template"
 
 printf "Remove unnecessary files based on file requirements map:\n"
-freqs_file="$TMP_LOCATION/$template/$FILE_REQS_FILENAME" 
+freqs_file="$SOURCE_LOCATION/$template/$FILE_REQS_FILENAME" 
 if [ -f "$freqs_file" ]; then
   while read l; do
     target="$(echo "$l" | sed 's/^\([^:]*\):.*/\1/')"
-    reqs=($(echo "$l" | sed 's/^[^:]*//' | tr ' ' '\n'))
-    remove=
+    reqs=($(echo "$l" | sed 's/^[^:]*://' | tr ' ' '\n'))
+    remove=1
     for r in "${reqs[@]}"; do
       for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
         kv=($(chunk 2 $i "${keyvalues[@]}"))
         if [ "${kv[0]}" == "$r" ] && \
-            ([ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]); then
-          remove=1
+            [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
+          remove=
           break;
         fi
       done
-      if [ -n "$remove" ]; then break; fi
+      if [ -z "$remove" ]; then break; fi
     done
     if [ -n "$remove" ]; then rm -rfv "$target"; fi
   done < "$freqs_file"
@@ -186,7 +206,7 @@ done
 printf "\tDone\n\n"
 
 printf "Resolving in-file template chunks:\n"
-starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n'))
+starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n' || true))
 for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
   s=($(chunk 3 $i "${starts[@]}"))
   e=${s[1]}
@@ -218,7 +238,12 @@ printf "Replacing any remaining in-file template variables:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   kv=($(chunk 2 $i "${keyvalues[@]}"))
   v="$([ "${#kv[@]}" -eq 2 ] && echo "${kv[1]}" || echo "")"
-  find . -type f -exec sed -i 's/'${kv[0]}'/'$v'/g' {} \;
+  v_camel="$(transform "$v" "camel")"
+  v_pascal="$(transform "$v" "pascal")"
+  find . -type f -exec sed -i "$(printf "%s; %s; %s" \
+    "s/${kv[0]}__CAMEL/$v_camel/g" \
+    "s/${kv[0]}__PASCAL/$v_pascal/g" \
+    "s/${kv[0]}/$v/g")" {} \;
 done
 printf "\tDone\n"
 

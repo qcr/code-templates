@@ -6,8 +6,20 @@ add_compile_options(-std=c++11)
 TEMPLATE_END
 
 find_package(catkin REQUIRED
+  TEMPLATE_START ADD_ACTIONS
+  genmsg actionlib_msgs
+  TEMPLATE_END
+  TEMPLATE_START ADD_CPP_NODE ADD_PY_NODE ADD_MSGS ADD_SERVICES ADD_ACTIONS
+  COMPONENTS
+  TEMPLATE_END
+  TEMPLATE_START ADD_CPP_NODE
+  roscpp
+  TEMPLATE_END
+  TEMPLATE_START ADD_PY_NODE
+  rospy
+  TEMPLATE_END
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
-  COMPONENTS message_generation std_msgs
+  message_generation std_msgs
   TEMPLATE_END
   )
 
@@ -40,6 +52,11 @@ TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
+  TEMPLATE_END
+  TEMPLATE_START ADD_ACTIONS
+  actionlib_msgs
+  TEMPLATE_END
+  TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   )
 TEMPLATE_END
 
@@ -56,28 +73,29 @@ include_directories(
   )
 
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}/ros_package.cpp
+  src/${PROJECT_NAME}/ADD_CPP_NODE.cpp
   )
 add_dependencies(${PROJECT_NAME}
   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}
   )
 
-add_executable(${PROJECT_NAME}_node src/ros_package_node.cpp)
+add_executable(${PROJECT_NAME}_node src/ADD_CPP_NODE.cpp)
 set_target_properties(${PROJECT_NAME}_node
-  PROPERTIES OUTPUT_NAME node PREFIX ""
+  PROPERTIES OUTPUT_NAME ADD_CPP_NODE PREFIX ""
   )
 add_dependencies(${PROJECT_NAME}_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS}
   )
 
 target_link_libraries(${PROJECT_NAME}_node
+  ${PROJECT_NAME}
   ${catkin_LIBRARIES}
   )
 TEMPLATE_END
 
 TEMPLATE_START ADD_PY_NODE
 catkin_install_python(PROGRAMS
-  scripts/my_python_script
+  scripts/ADD_PY_NODE
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )
 TEMPLATE_END
