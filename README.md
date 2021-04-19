@@ -1,4 +1,4 @@
-# QCR Templates
+# QCR Code Templates
 
 This repository defines shared templates for commonly performed actions within the [QUT Centre for Robotics (QCR)](https://research.qut.edu.au/qcr). We've made this project public as most of the templates have a general use case, and aren't directly tied to QCR.
 
