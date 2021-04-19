@@ -85,6 +85,11 @@ function prompt_value() {
     echo "$default" || echo "$value"
 }
 
+function var_replace() {
+  # $1 var name, $2 var value
+  # Here be dragons...
+  :
+}
 
 ################################################################################
 ################################# Main script ##################################
@@ -195,7 +200,7 @@ done
 printf "\tDone\n\n"
 
 printf "Resolving in-file template chunks:\n"
-starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n'))
+starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n' || true))
 for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
   s=($(chunk 3 $i "${starts[@]}"))
   e=${s[1]}
