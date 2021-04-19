@@ -1,1 +1,1 @@
-from .ADD_PYTHON_NODE import ADD_PYTHON_NODE.camel
+from .ADD_PY_NODE import ADD_PY_NODE

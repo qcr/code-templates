@@ -2,11 +2,11 @@
 
 import rospy
 
-from ADD_PYTHON_NODE import ADD_PYTHON_NODE.camel
+from PACKAGE_NAME import ADD_PY_NODE
 
-if __name__ == '__name__':
-    rospy.init_node('ADD_PYTHON_NODE')
+if __name__ == '__main__':
+    rospy.init_node('ADD_PY_NODE')
 
-    n = ADD_PYTHON_NODE.camel()
+    n = ADD_PY_NODE()
 
     rospy.spin()
