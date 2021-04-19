@@ -12,3 +12,11 @@ class ADD_PY_NODE__PASCAL:
 
     def callback(self, msg):
         rospy.loginfo('Received message: %s', msg)
+
+    def spin(self):
+        rospy.loginfo("Publishing on '%s' & listening on '%s'" %
+                      (self.pub.name, self.sub.name))
+        r = rospy.Rate(1)
+        while not rospy.is_shutdown():
+            self.pub.publish("tic")
+            r.sleep()

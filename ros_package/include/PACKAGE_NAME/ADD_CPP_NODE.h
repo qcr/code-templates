@@ -7,6 +7,8 @@ class ADD_CPP_NODE__PASCAL {
  public:
   ADD_CPP_NODE__PASCAL();
 
+  void spin();
+
  private:
   void callback(const std_msgs::String &msg);
 
