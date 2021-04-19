@@ -3,9 +3,9 @@
 
 namespace PACKAGE_NAME {
 
-class ADD_CPP_NODE {
+class ADD_CPP_NODE__PASCAL {
  public:
-  ADD_CPP_NODE();
+  ADD_CPP_NODE__PASCAL();
 
  private:
   void callback(const std_msgs::String &msg);
