@@ -5,8 +5,8 @@ import rospy
 from PACKAGE_NAME import ADD_PY_NODE__PASCAL
 
 if __name__ == '__main__':
+    # Start your custom node (node logic should be added to the ADD_PY_NODE__PASCAL
+    # class in the PACKAGE_NAME module, not here)
     rospy.init_node('ADD_PY_NODE')
-
     n = ADD_PY_NODE__PASCAL()
-
     rospy.spin()
