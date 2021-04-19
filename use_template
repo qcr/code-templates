@@ -21,7 +21,8 @@ TEMPLATE_START_MARKER="TEMPLATE_START"
 TEMPLATE_END_MARKER="TEMPLATE_END"
 TYPES=("basic" "yesno")
 
-SOURCE_LOCATION="$([ -z "${HACK:-}" ] && echo "$TMP_LOCATION" || echo "$HACK")"
+SOURCE_LOCATION="$([ -z "${LOCAL_LOCATION:-}" ] && echo "$TMP_LOCATION" \
+  || echo "$LOCAL_LOCATION")"
 
 ################################################################################
 ############################### Helper functions ###############################
