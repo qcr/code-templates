@@ -85,10 +85,15 @@ function prompt_value() {
     echo "$default" || echo "$value"
 }
 
-function var_replace() {
-  # $1 var name, $2 var value
-  # Here be dragons...
-  :
+function transform() {
+  # $1 value, $2 transformation type ("camel", "pascal")
+  if [ "${2,,}" == "camel" ]; then
+    echo "$1" | sed 's/_\(.\)/\U\1/g'
+  elif [ "${2,,}" == "pascal" ]; then
+    echo "$1" | sed 's/_\(.\)/\U\1/g; s/^./\U\0/'
+  else
+    echo "$1"
+  fi
 }
 
 ################################################################################
@@ -232,7 +237,12 @@ printf "Replacing any remaining in-file template variables:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   kv=($(chunk 2 $i "${keyvalues[@]}"))
   v="$([ "${#kv[@]}" -eq 2 ] && echo "${kv[1]}" || echo "")"
-  find . -type f -exec sed -i 's/'${kv[0]}'/'$v'/g' {} \;
+  v_camel="$(transform "$v" "camel")"
+  v_pascal="$(transform "$v" "pascal")"
+  find . -type f -exec sed -i "$(printf "%s; %s; %s" \
+    "s/${kv[0]}__CAMEL/$v_camel/g" \
+    "s/${kv[0]}__PASCAL/$v_pascal/g" \
+    "s/${kv[0]}/$v/g")" {} \;
 done
 printf "\tDone\n"
 
