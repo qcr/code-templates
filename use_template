@@ -12,8 +12,8 @@ IFS=$'\n\t'
 ############################### Global settings ################################
 ################################################################################
 
-FILE_REQS_FILENAME=".file_reqs.yaml"
-SETTINGS_FILENAME=".settings.yaml"
+FILE_REQS_FILENAME=".files.yaml"
+SETTINGS_FILENAME=".variables.yaml"
 TMP_LOCATION="/tmp/qcr_templates"
 TMP_FILE="/tmp/qcr_templates.tmp"
 
