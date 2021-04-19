@@ -2,7 +2,7 @@
 
 This repository defines shared templates for commonly performed actions within the [QUT Centre for Robotics (QCR)](https://research.qut.edu.au/qcr). We've made this project public as most of the templates have a general use case, and aren't directly tied to QCR.
 
-Templates can be used by through a single script, and new templates are created by writing some basic template script in a new folder.
+Templates can be used through a single script, and new templates are created by writing some basic template script in a new folder. The template 'engine' is ~250 lines of (admittedly terse) Bash.
 
 ## How to use a template
 
@@ -20,20 +20,20 @@ Your new projects can be created from a template simply by making a new folder a
 qcr_templates ros_package
 ```
 
-This will retrieve the template, and start a prompt asking you for values for your project. In general, it's best to use [snake_case](https://en.wikipedia.org/wiki/Snake_case) for programming variable values (i.e. `my_variable_value` not `myVariableValue` as templates typically apply variables to filenames, and _then_ modify them for use in code).
+This will retrieve the template, and start a prompt asking you for values for your project. In general, it's best to use [snake_case](https://en.wikipedia.org/wiki/Snake_case) for programming variable values (i.e. `my_variable_value` not `myVariableValue` as our modification function assumes snake_case).
 
 ## How templates work
 
-We use a very basic custom templating method in this project, with templates being declared by creating a new folder in this repository. Templates are defined using named variables, the user is prompted at runtime for values for these variables, and then the template is applied with the runtime values applied. Variable values can be used to:
+We use a very basic custom templating method in this project, with templates being declared by creating a new folder in this repository. Templates are defined using named variables, the user is prompted at runtime for values for these variables, and then a project is created from the template with the runtime values applied. Variable values can be used to:
 
 - replace in-file values in code / text
 - conditionally include blocks of code / text in files
 - generate filenames based on variables
 - conditionally create files
 
-Template variables are typically declared in upper snake case (i.e. `MY_VARIABLE`), can have default values which will be shown in the prompt, and are evaluated using Bash. This means that any variable with no value is considered false, and all other values considered true. A current limitation it that variables with default values cannot be changed to have no value.
+Template variable names are typically upper snake case (i.e. `MY_VARIABLE`), can have default values which will be shown in the prompt, and are evaluated using Bash. This means that any variable with no value is considered false, and all other values considered true. A current limitation is that variables with default values cannot be changed to have no value by the user at runtime.
 
-Variables are declared in a special files called `.variables.yaml` at the root of each template, with their syntax described [below](#creating-your-own-templates).
+Variables are declared in a special file called `.variables.yaml` at the root of each template, with their syntax described [below](#creating-your-own-templates).
 
 ### In-file text replacement
 
@@ -65,7 +65,7 @@ def obstacleDetector():
 
 ### Conditional in-file blocks
 
-Variables can also be used to declare whether blocks of code should be included in the output. Blocks being with `TEMPLATE_START variable_1 variable_2 ...` line, and end with a `TEMPLATE_END` line. The block is included if _any_ of `variable_1 variable_2 ...` have a value, and will only be excluded if _all_ are empty. For example, the following CMake template:
+Variables can also be used to declare whether blocks of code should be included in the output. Blocks begin with a `TEMPLATE_START variable_1 variable_2 ...` line, and end with a `TEMPLATE_END` line. The block is included if _any_ of `variable_1 variable_2 ...` have a value, and will only be excluded if _all_ are empty. For example, the following CMake template:
 
 ```cmake
 
@@ -113,10 +113,13 @@ Creating your own templates is almost as simple as using templates. To create yo
    ```yaml
    VARIABLE_NAME:
      text: "Text to be displayed to user in prompt"
-     default: "Default value. Use '""' if variable is optional"
-   NEXT_VARIABLE:
-     text: "User prompt"
-     default: $(echo "Arbitrary Bash code can be used instead as well")
+     default: "Default static value"
+   VARIABLE_WITH_DYNAMIC_DEFAULT:
+     text: "Variable with default value determined at runtime"
+     default: $(echo "This Bash code will be executed")
+   OPTIONAL_VARIABLE:
+     text: "Variable will be left blank if the user provides no input"
+     default: ""
    ```
 
 4. Create the files for your template, taking advantage of whichever [variable features](#how-templates-work) your template requires.
@@ -129,4 +132,4 @@ Creating your own templates is almost as simple as using templates. To create yo
 
 6. Once it works, push to the master branch. Done!
 
-Please note: a very crude YAML parser is written in [`use_template`](./use_template) to keep the dependencies of this software as low as possible. It is crude though, and you should not expect full YAML functionality (keep values on same line as key, don't use line breaks, no escape characters, etc.).
+Please note: a very crude YAML parser is written in [`use_template`](./use_template) to keep the dependencies of this software as low as possible. I emphasise, _crude_. You should not expect full YAML functionality (keep values on same line as key, don't use line breaks, no escape characters, etc.).
