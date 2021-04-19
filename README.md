@@ -127,7 +127,7 @@ Creating your own templates is almost as simple as using templates. To create yo
 5. **Test** your template locally before pushing to master (as soon as it's pushed everyone can use it). Test locally by directly running the `use_template` script with local files instead of the remote:
 
    ```
-   LOCAL_LOCATION=. ./use_template my_new_template
+   LOCAL_LOCATION=/path/to/local/clone/of/this/repo ./use_template my_new_template
    ```
 
 6. Once it works, push to the master branch. Done!
