@@ -1,6 +1,6 @@
 PACKAGE_NAME:
   text: "Package name"
-  default: "my_package"
+  default: $(basename $(realpath .))
 PACKAGE_VERSION:
   text: "Package version"
   default: "0.1.0"
@@ -14,17 +14,17 @@ LICENSE:
   text: "License type"
   default: "BSD"
 ADD_CPP_NODE:
-  text: "Add a custom C++ ROS node with name:"
+  text: "Add a custom C++ ROS node with name"
   default: ""
 ADD_PY_NODE:
-  text: "Add a custom Python ROS node with name:"
+  text: "Add a custom Python ROS node with name"
   default: ""
 ADD_MSGS:
-  text: "Add custom ROS message definition with name:"
+  text: "Add custom ROS message definition with name"
   default: ""
 ADD_SERVICES:
-  text: "Add custom ROS service definition with name:"
+  text: "Add custom ROS service definition with name"
   default: ""
 ADD_ACTIONS:
-  text: "Add custom ROS action definition with name:"
+  text: "Add custom ROS action definition with name"
   default: ""
