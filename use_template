@@ -166,18 +166,18 @@ freqs_file="$SOURCE_LOCATION/$template/$FILE_REQS_FILENAME"
 if [ -f "$freqs_file" ]; then
   while read l; do
     target="$(echo "$l" | sed 's/^\([^:]*\):.*/\1/')"
-    reqs=($(echo "$l" | sed 's/^[^:]*//' | tr ' ' '\n'))
-    remove=
+    reqs=($(echo "$l" | sed 's/^[^:]*://' | tr ' ' '\n'))
+    remove=1
     for r in "${reqs[@]}"; do
       for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
         kv=($(chunk 2 $i "${keyvalues[@]}"))
         if [ "${kv[0]}" == "$r" ] && \
-            ([ "${#kv[@]}" -eq 1 ] || [ -z "${kv[1]}" ]); then
-          remove=1
+            [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
+          remove=
           break;
         fi
       done
-      if [ -n "$remove" ]; then break; fi
+      if [ -z "$remove" ]; then break; fi
     done
     if [ -n "$remove" ]; then rm -rfv "$target"; fi
   done < "$freqs_file"
