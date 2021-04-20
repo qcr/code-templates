@@ -1,5 +1,11 @@
 # QCR Code Templates
 
+[![QUT Centre for Robotics Open Source](https://github.com/qcr/qcr.github.io/raw/master/misc/badge.svg)](https://qcr.github.io)
+![Primary language](https://img.shields.io/github/languages/top/qcr/code_templates)
+[![License](https://img.shields.io/github/license/qcr/code_templates)](./LICENSE.txt)
+
+![Demo of the ros_package template](./.demo.gif)
+
 This repository defines shared templates for commonly performed actions within the [QUT Centre for Robotics (QCR)](https://research.qut.edu.au/qcr). We've made this project public as most of the templates have a general use case, and aren't directly tied to QCR.
 
 Templates can be used through a single script, and new templates are created by writing some basic template script in a new folder. The template 'engine' is ~250 lines of (admittedly terse) Bash.
