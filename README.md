@@ -12,6 +12,8 @@ Templates can be used through a single script, and new templates are created by 
 
 ## How to use a template
 
+**_Note: QCR members can access templates directly using the `qcr` script from [our tools](https://github.com/qcr/tools)_**
+
 Place the script in your path somewhere (`~/bin/` is suggested), and make it executable:
 
 ```
