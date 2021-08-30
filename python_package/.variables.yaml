@@ -17,5 +17,5 @@ PACKAGE_DEPENDENCIES:
   text: "Package Python dependencies"
   default: "['numpy']"
 ADD_ENTRYPOINT:
-  text: "Add installable entry point with name"
+  text: "Add entry point with name (same name as PACKAGE_NAME is a good idea)"
   default: ""
