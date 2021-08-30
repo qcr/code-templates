@@ -24,7 +24,7 @@ PACKAGE_NAME is used by TODO details / examples of how to use PACKAGE_NAME
 
 To use PACKAGE_NAME, we just act that you cite our paper
 
-TODO insert ``````bibtex code block for research associated with your package
+TODO insert ```bibtex code block for research associated with your package
 
 TODO also insert blocks for any other 3rd party research your package uses
 
