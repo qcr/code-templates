@@ -1,0 +1,24 @@
+PACKAGE_NAME:
+  text: "Package name"
+  default: $(basename $(realpath .))
+PACKAGE_VERSION:
+  text: "Package version"
+  default: "0.1.0"
+AUTHOR_NAME:
+  text: "Author's name"
+  default: $(git config user.name || echo "QCR")
+AUTHOR_EMAIL:
+  text: "Author's email"
+  default: $(git config user.email || echo "qcrbot@qut.edu.au")
+PACKAGE_DESCRIPTION:
+  text: "Short package description"
+  default: "My package"
+LICENSE_FILE:
+  text: "License filename"
+  default: "LICENSE.txt"
+PACKAGE_DEPENDENCIES:
+  text: "Package Python dependencies"
+  default: "['numpy']"
+ADD_ENTRYPOINT:
+  text: "Add entry point with name (same name as PACKAGE_NAME is a good idea)"
+  default: ""

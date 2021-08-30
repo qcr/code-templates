@@ -1,3 +1,5 @@
+# Created with QCR's code template tool: https://github.com/qcr/code_templates
+
 cmake_minimum_required(VERSION 3.0.2)
 project(PACKAGE_NAME)
 
@@ -5,12 +7,12 @@ TEMPLATE_START ADD_CPP_NODE
 add_compile_options(-std=c++11)
 TEMPLATE_END
 
-find_package(catkin REQUIRED
+find_package(catkin REQUIRED COMPONENTS
   TEMPLATE_START ADD_ACTIONS
-  genmsg actionlib_msgs
+  genmsg
+  actionlib_msgs
   TEMPLATE_END
   TEMPLATE_START ADD_CPP_NODE ADD_PY_NODE ADD_MSGS ADD_SERVICES ADD_ACTIONS
-  COMPONENTS
   TEMPLATE_END
   TEMPLATE_START ADD_CPP_NODE
   roscpp
@@ -19,7 +21,8 @@ find_package(catkin REQUIRED
   rospy
   TEMPLATE_END
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
-  message_generation std_msgs
+  message_generation
+  std_msgs
   TEMPLATE_END
   )
 
@@ -62,7 +65,14 @@ TEMPLATE_END
 
 catkin_package(
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
-  CATKIN_DEPENDS message_runtime
+  CATKIN_DEPENDS
+  message_runtime
+  TEMPLATE_END
+  TEMPLATE_START ADD_MSGS
+  std_msgs
+  TEMPLATE_END
+  TEMPLATE_START ADD_ACTIONS
+  actionlib_msgs
   TEMPLATE_END
   )
 
@@ -101,6 +111,11 @@ catkin_install_python(PROGRAMS
 TEMPLATE_END
 
 TEMPLATE_START ADD_CPP_NODE
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+  )
 install(TARGETS ${PROJECT_NAME}_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   )

@@ -4,7 +4,7 @@
 ![Primary language](https://img.shields.io/github/languages/top/qcr/code_templates)
 [![License](https://img.shields.io/github/license/qcr/code_templates)](./LICENSE.txt)
 
-![Demo of the ros_package template](./.demo.gif)
+![Demo of the ros_package template](https://github.com/qcr/code_templates/wiki/demo.gif)
 
 This repository defines shared templates for commonly performed actions within the [QUT Centre for Robotics (QCR)](https://research.qut.edu.au/qcr). We've made this project public as most of the templates have a general use case, and aren't directly tied to QCR.
 
@@ -97,8 +97,6 @@ The opposite relationship (include if _all_ have a value) isn't yet supported, b
 ### Variable file names
 
 File names can be given variable values simply by using the variable name in the filename. For example, a file called `MY_VARIABLE.cpp` with a runtime value of `MY_VARIABLE='object_detector'` would be renamed to `object_detector.cpp`.
-
-The `__CAMEL` and `__PASCAL` modifiers aren't currently supported, but can be in the future if needed.
 
 ### Conditional file existence
 

@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
+<!-- Created with QCR's code template tool: https://github.com/qcr/code_templates -->
+
 <package format="2">
   <name>PACKAGE_NAME</name>
   <version>PACKAGE_VERSION</version>
@@ -8,12 +10,23 @@
 
   <license>LICENSE</license>
 
+  TEMPLATE_START ADD_CPP_NODE
+  <build_depend>roscpp</build_depend>
+  TEMPLATE_END
+  TEMPLATE_START ADD_PY_NODE
+  <build_depend>rospy</build_depend>
+  TEMPLATE_END
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>std_msgs</exec_depend>
   TEMPLATE_END
   TEMPLATE_START ADD_ACTIONS
+  <build_depend>genmsg</build_depend>
   <build_depend>actionlib_msgs</build_depend>
+  <build_export_depend>actionlib_msgs</build_export_depend>
   <exec_depend>actionlib_msgs</exec_depend>
   TEMPLATE_END
   <buildtool_depend>catkin</buildtool_depend>
