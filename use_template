@@ -117,20 +117,28 @@ git clone --depth 1 -b develop https://github.com/qcr/templates \
 printf "Done\n"
 
 # Each directory denotes a valid template, process the user's selection
+template="${1:-}"
 templates=($(find "$SOURCE_LOCATION" -mindepth 1 -maxdepth 1 -type d \
-  -not -name '.git' -exec basename {} \;))
-if [ -z "${1:-}" ] || ! printf '%s\n' "${templates[@]}" | \
+  -not -name '.*' -exec basename {} \;))
+if [ -z "$template" ] || ! printf '%s\n' "${templates[@]}" | \
     grep -q "^$1$"; then
-  printf "\nERROR: %s"  \
-    "Invalid template provided ('${1:-}'). Please select one of:"
-  printf "\n\t%s" "${templates[@]}"
-  printf "\n"
-  exit 1
+  selection=0
+  while [ "$selection" -eq 0 ] || [ "$selection" -gt "${#templates[@]}" ]; do
+    printf "\n\e[33m%s\n" \
+      "Invalid template provided ('${1:-}'). Select from the options:"
+      for i in "${!templates[@]}"; do 
+        printf "\n\t[$((i+1))] %s" "${templates[i]}"
+      done
+    printf "\n\nSelection: \e[0m"
+    read -n1 selection
+    if ! [[ "$selection" =~ ^[0-9]+$ ]]; then selection=0; fi
+  done
+  template="${templates[$((selection-1))]}"
+  printf "\n\nProceeding with '$template'...\n"
 fi
 
 # Prompt user for variable values (using hacky "YAML" parsing)
 heading "Prompting user settings"
-template="$1"
 settings_file="$SOURCE_LOCATION/$template/$SETTINGS_FILENAME" 
 keyvalues=()
 if [ -f "$settings_file" ]; then
