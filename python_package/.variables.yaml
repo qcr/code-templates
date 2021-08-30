@@ -10,6 +10,9 @@ AUTHOR_NAME:
 AUTHOR_EMAIL:
   text: "Author's email"
   default: $(git config user.email || echo "qcrbot@qut.edu.au")
+PACKAGE_DESCRIPTION:
+  text: "Short package description"
+  default: "My package"
 LICENSE_FILE:
   text: "License filename"
   default: "LICENSE.txt"
