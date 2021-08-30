@@ -199,8 +199,28 @@ printf "Renaming directories and files:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   kv=($(chunk 2 $i "${keyvalues[@]}"))
   if [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
-    find . -depth -name "*${kv[0]}*" -exec \
-      bash -c 'mv -v "{}" "$(echo {} | sed "s/'${kv[0]}'/'${kv[1]}'/")"' \;
+    v="${kv[1]}"
+    v_camel="$(transform "$v" "camel")"
+    v_pascal="$(transform "$v" "pascal")"
+    for f in $(find . -depth -name "*${kv[0]}*"); do
+      if [ -z "$f" ]; then continue; fi
+      f_out="$f"
+      x=0
+      while [ "$f" == "$f_out" ] && [ "$x" -lt 3 ]; do
+        if [ "$x" -eq 0 ]; then 
+          f_out="$(echo "$f_out" | \
+            sed 's/\(.*\)'${kv[0]}'__CAMEL/\1'$v_camel'/')"
+        elif [ "$x" -eq 1 ]; then 
+          f_out="$(echo "$f_out" | \
+            sed 's/\(.*\)'${kv[0]}'__PASCAL/\1'$v_pascal'/')"
+        else
+          f_out="$(echo "$f_out" | \
+            sed 's/\(.*\)'${kv[0]}'/\1'$v'/')"
+        fi
+        x=$((x+1))
+      done
+      mv -v "$f" "$f_out"
+    done
   fi
 done
 printf "\tDone\n\n"

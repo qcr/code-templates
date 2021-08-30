@@ -98,8 +98,6 @@ The opposite relationship (include if _all_ have a value) isn't yet supported, b
 
 File names can be given variable values simply by using the variable name in the filename. For example, a file called `MY_VARIABLE.cpp` with a runtime value of `MY_VARIABLE='object_detector'` would be renamed to `object_detector.cpp`.
 
-The `__CAMEL` and `__PASCAL` modifiers aren't currently supported, but can be in the future if needed.
-
 ### Conditional file existence
 
 Another special file called `.files.yaml` marks files which should only exist under certain conditions. It's syntax is based on very basic key-value pairs (`filename: variable_1 variable_2 ...`), with the filed included if _any_ of `variable_1 variable_2 ...` have a value. See existing templates for examples.
