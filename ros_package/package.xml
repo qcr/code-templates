@@ -10,6 +10,12 @@
 
   <license>LICENSE</license>
 
+  TEMPLATE_START ADD_CPP_NODE
+  <build_depend>roscpp</build_depend>
+  TEMPLATE_END
+  TEMPLATE_START ADD_PY_NODE
+  <build_depend>rospy</build_depend>
+  TEMPLATE_END
   TEMPLATE_START ADD_MSGS ADD_SERVICES ADD_ACTIONS
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
