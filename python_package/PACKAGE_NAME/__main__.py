@@ -1,4 +1,4 @@
-from .PACKAGE_NAME__PASCAL import PACKAGE_NAME__CAMEL
+from .PACKAGE_NAME import PACKAGE_NAME__PASCAL
 
 
 def main():

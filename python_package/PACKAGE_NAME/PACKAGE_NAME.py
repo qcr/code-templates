@@ -1,10 +1,10 @@
-class PACKAGE_NAME__CAMEL:
+class PACKAGE_NAME__PASCAL:
 
     def __init__(self):
-        print("Create instance of my 'PACKAGE_NAME__CAMEL' class")
+        print("Create instance of my 'PACKAGE_NAME__PASCAL' class")
 
     def dummy_method(self):
-        print("Called dummy_method from 'PACKAGE_NAME__CAMEL' class")
+        print("Called dummy_method from 'PACKAGE_NAME__PASCAL' class")
 
 
 def package_only_method():
