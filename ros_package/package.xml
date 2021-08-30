@@ -1,6 +1,6 @@
+<?xml version="1.0"?>
 <!-- Created with QCR's code template tool: https://github.com/qcr/code_templates -->
 
-<?xml version="1.0"?>
 <package format="2">
   <name>PACKAGE_NAME</name>
   <version>PACKAGE_VERSION</version>
