@@ -29,3 +29,5 @@ TODO insert ```bibtex code block for research associated with your package
 TODO also insert blocks for any other 3rd party research your package uses
 
 TODO insert acknowledgements of any funding supporters
+
+<!-- Created with QCR's code template tool: https://github.com/qcr/code_templates -->

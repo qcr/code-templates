@@ -1,3 +1,5 @@
+# Created with QCR's code template tool: https://github.com/qcr/code_templates
+
 from setuptools import find_packages, setup
 
 with open("README.md", "r") as fh:

@@ -1,3 +1,5 @@
+# Created with QCR's code template tool: https://github.com/qcr/code_templates
+
 cmake_minimum_required(VERSION 3.0.2)
 project(PACKAGE_NAME)
 
