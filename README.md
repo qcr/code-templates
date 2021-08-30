@@ -4,7 +4,7 @@
 ![Primary language](https://img.shields.io/github/languages/top/qcr/code_templates)
 [![License](https://img.shields.io/github/license/qcr/code_templates)](./LICENSE.txt)
 
-![Demo of the ros_package template](./.demo.gif)
+![Demo of the ros_package template](https://github.com/qcr/code_templates/wiki/demo.gif)
 
 This repository defines shared templates for commonly performed actions within the [QUT Centre for Robotics (QCR)](https://research.qut.edu.au/qcr). We've made this project public as most of the templates have a general use case, and aren't directly tied to QCR.
 
