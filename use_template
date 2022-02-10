@@ -257,7 +257,7 @@ for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
     if [ -n "$v" ]; then pass=1 ; break; fi
   done
 
-  sed -i ${s[1]}$([ -z "$pass" ] && echo ',' || echo 'd;')$e'd' "${s[0]}"
+  sed -i '' ${s[1]}$([ -z "$pass" ] && echo ',' || echo 'd;')$e'd' "${s[0]}"
   cat -s "${s[0]}" > "$TMP_FILE"; mv "$TMP_FILE" "${s[0]}"
 done
 printf "\tDone\n\n"
@@ -268,7 +268,7 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   v="$([ "${#kv[@]}" -eq 2 ] && echo "${kv[1]}" || echo "")"
   v_camel="$(transform "$v" "camel")"
   v_pascal="$(transform "$v" "pascal")"
-  find . -type f -exec sed -i "$(printf "%s; %s; %s" \
+  find . -type f -exec sed -i '' "$(printf "%s; %s; %s" \
     "s/${kv[0]}__CAMEL/$v_camel/g" \
     "s/${kv[0]}__PASCAL/$v_pascal/g" \
     "s/${kv[0]}/$v/g")" {} \;
