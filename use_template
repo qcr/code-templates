@@ -103,8 +103,16 @@ function transform() {
 
 # Error if the directory isn't empty
 if [ -n "$(ls -A .)" ]; then
-  printf "ERROR: %s%s\n%s\n" "This directory isn't empty. "\
+  printf "ERROR: %s%s\n%s\n" "This directory isn't empty. " \
     "Please only run this script in an empty directory," "for a NEW project!"
+  exit 1
+fi
+
+# Error if required tools aren't found
+if ! command -v realpath &> /dev/null ; then
+  printf "ERROR: %s%s\n%s\n" "The command 'realpath' wasn't found. " \
+    "Please install 'coreutils' from your package " \
+    "manager (i.e. apt, brew, mamba, etc.)." 
   exit 1
 fi
 
