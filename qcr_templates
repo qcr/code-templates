@@ -105,6 +105,13 @@ function transform() {
 ################################# Main script ##################################
 ################################################################################
 
+# Error if bash is too old
+if [ "$(echo $BASH_VERSION | sed 's/^\([0-9]\)*\..*/\1/')" -lt 4 ]; then
+  printf "ERROR: %s\n\t%s\n" "Bash version 4.0+ is required. Detected:" \
+    "$BASH_VERSION"
+  exit 1
+fi
+
 # Error if the directory isn't empty
 if [ -n "$(ls -A .)" ]; then
   printf "ERROR: %s%s\n%s\n" "This directory isn't empty. " \
