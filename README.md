@@ -14,13 +14,18 @@ Templates can be used through a single script, and new templates are created by 
 
 **_Note: QCR members can access templates directly using the `qcr` script from [our tools](https://github.com/qcr/tools)_**
 
-Place the script in your path somewhere (`~/bin/` is suggested), and make it executable:
+Clone this Git repository:
 
 ```
-wget https://github.com/qcr/code_templates/raw/master/qcr_templates && chmod a+x qcr_templates
+git clone https://github.com/qcr/code_templates
 ```
 
-The intention is once you've got the above script, it will always give you access to the latest templates (no need to update).
+And add the `qcr_templates` script to your path somewhere if you'd like to use from any directory. We recommend adding it to `~/bin` directory as follows:
+
+```
+mkdir ~/bin
+ln -s /path/to/code_templates/qcr_templates ~/bin/
+```
 
 Your new projects can be created from a template simply by making a new folder and running the script with your chosen template inside that folder. For example:
 
