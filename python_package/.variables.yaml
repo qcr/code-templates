@@ -19,6 +19,9 @@ LICENSE_FILE:
 PACKAGE_DEPENDENCIES:
   text: "Package Python dependencies"
   default: "['numpy']"
+PACKAGE_URL:
+  text: "Add package URL"
+  default: ""
 ADD_ENTRYPOINT:
   text: "Add entry point with name (same name as PACKAGE_NAME is a good idea)"
   default: ""
