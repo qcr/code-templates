@@ -131,7 +131,7 @@ fi
 heading "Getting latest templates"
 if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
 mkdir -p "$TMP_LOCATION"
-git clone --depth 1 -b develop https://github.com/qcr/templates \
+git clone --depth 1 -b main https://github.com/qcr/templates \
   "$TMP_LOCATION"
 printf "Done\n"
 
