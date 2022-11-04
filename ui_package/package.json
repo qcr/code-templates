@@ -1,0 +1,30 @@
+{
+  "name": "PLATFORM_ID-platform",
+  "version": "PACKAGE_VERSION",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.8.2",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/material": "^5.5.1",
+    "@types/node": "^18.8.1",
+    "@types/react": "^18.0.21",
+    "next": "^12.1.0",
+    "qcr-sites-shared": "git+ssh://git@github.com/qcr/sites-shared.git",
+    "react": "^18.2.0",
+    "react-dom": "18.2.0",
+    "react-toastify": "^9.0.8",
+    "robot-ui-shared": "git+ssh://git@github.com/qcr/robot-ui-shared.git"
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "eslint-config-next": "^12.3.1",
+    "typescript": "^4.8.4"
+  }
+}

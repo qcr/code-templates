@@ -1,0 +1,21 @@
+PACKAGE_NAME:
+  text: "Package name"
+  default: $(basename $(realpath .))
+PACKAGE_VERSION:
+  text: "Package version"
+  default: "0.1.0"
+AUTHOR_NAME:
+  text: "Author's name"
+  default: $(git config user.name || echo "QCR")
+AUTHOR_EMAIL:
+  text: "Author's email"
+  default: $(git config user.email || echo "qcrbot@qut.edu.au")
+LICENSE:
+  text: "License type"
+  default: "BSD"
+PLATFORM_ID:
+  text: "Platform ID - please keep short (one word)"
+  default: "template"
+ADD_CUSTOM_LOGO:
+  text: "Include a Custom Logo?"
+  default: ""
