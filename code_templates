@@ -18,19 +18,45 @@ IFS=$'\n\t'
 
 FILE_REQS_FILENAME=".files.yaml"
 SETTINGS_FILENAME=".variables.yaml"
-TMP_LOCATION="/tmp/qcr_templates"
-TMP_FILE="/tmp/qcr_templates.tmp"
+TMP_LOCATION="/tmp/code_templates"
+TMP_FILE="/tmp/code_templates.tmp"
 
 TEMPLATE_START_MARKER="TEMPLATE_START"
 TEMPLATE_END_MARKER="TEMPLATE_END"
 TYPES=("basic" "yesno")
 
-SOURCE_LOCATION="$([ -z "${LOCAL_LOCATION:-}" ] && echo "$TMP_LOCATION" \
-  || echo "$LOCAL_LOCATION")"
+SOURCE_LOCATION="$([ -z "${LOCAL_LOCATION:-}" ] && echo "$TMP_LOCATION" || echo "$LOCAL_LOCATION")"
+
+
+# The name of this script, and the directory where it is located
+SCRIPT_NAME="$(basename $(readlink -f $0))"
+SCRIPT_DIR="$(dirname $(readlink -f $0))"
 
 ################################################################################
 ############################### Helper functions ###############################
 ################################################################################
+
+function print_usage(){
+    templates=($(find "$SOURCE_LOCATION" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec basename {} \;))
+
+    printf "\nCreates a new code file/folder structure using a code template. 
+
+    Usage:
+        code_templates [-h|--help] <TEMPLATE>
+
+    Arguments:
+        <TEMPLATE>  the template to use. Each folder defines a different template.
+                    See https://github.com/qcr/code_templates for potential templates.
+
+    Templates:
+"
+
+    for t in ${templates[@]}; do
+      printf "\t> $t\n"
+    done 
+
+    exit 0
+}
 
 function chunk_count() {
   # $1 chunk size, $2... array values
@@ -112,6 +138,31 @@ if [ "$(echo $BASH_VERSION | sed 's/^\([0-9]\)*\..*/\1/')" -lt 4 ]; then
   exit 1
 fi
 
+# Get a local copy of the templates repo
+heading "Getting latest templates"
+if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
+mkdir -p "$TMP_LOCATION"
+git clone --depth 1 -b main https://github.com/qcr/templates \
+  "$TMP_LOCATION"
+printf "Done\n"
+
+# Parse Args
+heading "Running Main Script"
+PARSED_ARGS=$(getopt -a -n ${SCRIPT_NAME} -o 'h' --long 'help' -- "$@")
+eval set -- "${PARSED_ARGS}"
+while true; do
+case "$1" in 
+    -h|--help) print_usage ;;
+    # -- indicates end of arguments, break while loop
+    --) shift; break ;;
+    # invalid option was passed, print usage
+    *)
+    printf "${ERROR}Unrecognized option '$1'\n" 
+    print_usage 
+    exit 1 ;;    
+esac
+done
+
 # Error if the directory isn't empty
 if [ -n "$(ls -A .)" ]; then
   printf "ERROR: %s%s\n%s\n" "This directory isn't empty. " \
@@ -126,14 +177,6 @@ if ! command -v realpath &> /dev/null ; then
     "manager (i.e. apt, brew, mamba, etc.)." 
   exit 1
 fi
-
-# Get a local copy of the templates repo
-heading "Getting latest templates"
-if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
-mkdir -p "$TMP_LOCATION"
-git clone --depth 1 -b main https://github.com/qcr/templates \
-  "$TMP_LOCATION"
-printf "Done\n"
 
 # Each directory denotes a valid template, process the user's selection
 template="${1:-}"
