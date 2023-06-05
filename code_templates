@@ -10,7 +10,6 @@
 # This should maybe turn into Python if it grows any more?
 
 set -euo pipefail
-IFS=$'\n\t'
 
 ################################################################################
 ############################### Global settings ################################
@@ -32,30 +31,51 @@ SOURCE_LOCATION="$([ -z "${LOCAL_LOCATION:-}" ] && echo "$TMP_LOCATION" || echo 
 SCRIPT_NAME="$(basename $(readlink -f $0))"
 SCRIPT_DIR="$(dirname $(readlink -f $0))"
 
+# Screen Reset
+RESET='\033[0m'
+
+# Screen Colors
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+WHITE="\033[0;37m"
+
+# Screen helpers
+INFO="${GREEN}[INFO]${RESET} "
+WARN="${YELLOW}[WARN]${RESET} "
+ERROR="${RED}[ERROR]${RESET} "
+
 ################################################################################
 ############################### Helper functions ###############################
 ################################################################################
 
 function print_usage(){
-    templates=($(find "$SOURCE_LOCATION" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec basename {} \;))
-
     printf "\nCreates a new code file/folder structure using a code template. 
 
-    Usage:
-        code_templates [-h|--help] <TEMPLATE>
+Usage:
+    code_templates [-h|--help] [<TEMPLATE>]
 
-    Arguments:
-        <TEMPLATE>  the template to use. Each folder defines a different template.
-                    See https://github.com/qcr/code_templates for potential templates.
+Arguments:
+    <TEMPLATE>  the template to use, or leave blank to be prompted with selection.
 
-    Templates:
+Templates:
 "
 
-    for t in ${templates[@]}; do
-      printf "\t> $t\n"
-    done 
+    TEMPLATES="$(get_templates)"
+    for i in ${TEMPLATES[@]}; do
+        printf "    > $i\n"
+    done
 
-    exit 0
+    printf "\nExample:
+    Create new work instruction: mkdir new_wi && cd new_wi && latex-templates work_instruction
+"
+
+}
+
+
+function get_templates() {
+    TEMPLATES=($(find "${SCRIPT_DIR}" -mindepth 1 -maxdepth 1 -type d -not -name ".*" -exec basename {} \;))
+    echo "${TEMPLATES[@]}"
 }
 
 function chunk_count() {
@@ -73,17 +93,24 @@ function chunk() {
   done
 }
 
-function heading() {
-  # $1 heading text
-  char="-"
-  text=" ${1:-} "
-  (( left_pad=(80 - ${#text})/2 ))
-  (( right_pad=(81 - ${#text})/2 ))
-  printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
-  printf "%.0s$char" $(seq 1 $left_pad)
-  printf "$text"
-  printf "%.0s$char" $(seq 1 $right_pad)
-  printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+function display_heading() {
+    # Prints a heading to the screen
+    #
+    # Usage:
+    #   display_heading "<HEADING TEXT>"
+
+    # $1 heading text
+    char="-"
+    text=" ${1:-} "
+    (( left_pad=(80 - ${#text})/2 ))
+    (( right_pad=(81 - ${#text})/2 ))
+    printf "${GREEN}"
+    printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+    printf "%.0s$char" $(seq 1 $left_pad)
+    printf "${WHITE}$text${GREEN}"
+    printf "%.0s$char" $(seq 1 $right_pad)
+    printf "\n"; printf "%.0s$char" {1..80}; printf "\n"
+    printf "${RESET}"
 }
 
 function prompt_value() {
@@ -131,6 +158,9 @@ function transform() {
 ################################# Main script ##################################
 ################################################################################
 
+# Heading
+display_heading "QCR CODE TEMPLATES"
+
 # Error if bash is too old
 if [ "$(echo $BASH_VERSION | sed 's/^\([0-9]\)*\..*/\1/')" -lt 4 ]; then
   printf "ERROR: %s\n\t%s\n" "Bash version 4.0+ is required. Detected:" \
@@ -139,20 +169,19 @@ if [ "$(echo $BASH_VERSION | sed 's/^\([0-9]\)*\..*/\1/')" -lt 4 ]; then
 fi
 
 # Get a local copy of the templates repo
-heading "Getting latest templates"
+printf "${INFO}Getting latest templates"
 if [ -d "$TMP_LOCATION" ]; then rm -rf "$TMP_LOCATION"; fi
 mkdir -p "$TMP_LOCATION"
 git clone --depth 1 -b main https://github.com/qcr/templates \
   "$TMP_LOCATION"
-printf "Done\n"
+printf "Done\n\n"
 
 # Parse Args
-heading "Running Main Script"
 PARSED_ARGS=$(getopt -a -n ${SCRIPT_NAME} -o 'h' --long 'help' -- "$@")
 eval set -- "${PARSED_ARGS}"
 while true; do
-case "$1" in 
-    -h|--help) print_usage ;;
+  case "$1" in 
+    -h|--help) print_usage; exit 0 ;;
     # -- indicates end of arguments, break while loop
     --) shift; break ;;
     # invalid option was passed, print usage
@@ -160,7 +189,7 @@ case "$1" in
     printf "${ERROR}Unrecognized option '$1'\n" 
     print_usage 
     exit 1 ;;    
-esac
+  esac
 done
 
 # Error if the directory isn't empty
@@ -178,29 +207,40 @@ if ! command -v realpath &> /dev/null ; then
   exit 1
 fi
 
-# Each directory denotes a valid template, process the user's selection
+# Get list of templates - each directory denotes a valid template
+templates=($(find "$SOURCE_LOCATION" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec basename {} \;))
+
+# Get template selection - either from command line or user selection
 template="${1:-}"
-templates=($(find "$SOURCE_LOCATION" -mindepth 1 -maxdepth 1 -type d \
-  -not -name '.*' -exec basename {} \;))
+if [ "$template" == '' ]; then
+  printf "${INFO}Template Selection\n"
+fi
+
 if [ -z "$template" ] || ! printf '%s\n' "${templates[@]}" | \
     grep -q "^$1$"; then
   selection=0
   while [ "$selection" -eq 0 ] || [ "$selection" -gt "${#templates[@]}" ]; do
-    printf "\n\e[33m%s\n" \
-      "Invalid template provided ('${1:-}'). Select from the options:"
+    if [ ! "$template" == '' ]; then
+      printf "${YELLOW}Invalid template provided ('${1:-}')"
+    fi
+
+    printf "${YELLOW}Select from the options:"
       for i in "${!templates[@]}"; do 
         printf "\n\t[$((i+1))] %s" "${templates[i]}"
       done
-    printf "\n\nSelection: \e[0m"
+    printf "\n\nSelection: ${RESET}"
     read -n1 selection
     if ! [[ "$selection" =~ ^[0-9]+$ ]]; then selection=0; fi
   done
   template="${templates[$((selection-1))]}"
-  printf "\n\nProceeding with '$template'...\n"
+  printf "\n"
 fi
 
+printf "${INFO}Proceeding with template: '$template'\n"
+
 # Prompt user for variable values (using hacky "YAML" parsing)
-heading "Prompting user settings"
+IFS=$'\n\t'
+display_heading "Prompting User Settings"
 settings_file="$SOURCE_LOCATION/$template/$SETTINGS_FILENAME" 
 keyvalues=()
 if [ -f "$settings_file" ]; then
@@ -235,14 +275,14 @@ else
 fi
 
 # Create from template in local directory
-heading "Creating project from template"
+display_heading "Creating project from template"
 rsync -avL "$SOURCE_LOCATION/$template/" .
 rm -vf "$SETTINGS_FILENAME" "$FILE_REQS_FILENAME"
 
 # Modify local directory based on variable settings
-heading "Applying user settings to template"
+printf "${INFO}Applying user settings to template"
 
-printf "Remove unnecessary files based on file requirements map:\n"
+printf "${INFO}Remove unnecessary files based on file requirements map:\n"
 freqs_file="$SOURCE_LOCATION/$template/$FILE_REQS_FILENAME" 
 if [ -f "$freqs_file" ]; then
   while read l; do
@@ -265,7 +305,7 @@ if [ -f "$freqs_file" ]; then
 fi
 printf "\tDone\n\n"
 
-printf "Renaming directories and files:\n"
+printf "${INFO}Renaming directories and files:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   kv=($(chunk 2 $i "${keyvalues[@]}"))
   if [ "${#kv[@]}" -eq 2 ] && [ -n "${kv[1]}" ]; then
@@ -295,7 +335,7 @@ for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
 done
 printf "\tDone\n\n"
 
-printf "Resolving in-file template chunks:\n"
+printf "${INFO}Resolving in-file template chunks:\n"
 starts=($(grep -rEn "^ *$TEMPLATE_START_MARKER" . | tr ':' '\n' || true))
 for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
   s=($(chunk 3 $i "${starts[@]}"))
@@ -324,7 +364,7 @@ for i in $(seq $(chunk_count 3 "${starts[@]}") -1 1); do
 done
 printf "\tDone\n\n"
 
-printf "Replacing any remaining in-file template variables:\n"
+printf "${INFO}Replacing any remaining in-file template variables:\n"
 for i in $(seq 1 $(chunk_count 2 "${keyvalues[@]}")); do
   kv=($(chunk 2 $i "${keyvalues[@]}"))
   v="$([ "${#kv[@]}" -eq 2 ] && echo "${kv[1]}" || echo "")"
